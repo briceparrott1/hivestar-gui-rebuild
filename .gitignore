@@ -6,5 +6,8 @@ venv/
 .pytest_cache/
 *.egg-info/
 
+# SQLite (services/mission-control keeps its DB on a mounted volume, not in git)
+*.sqlite3
+
 # OS
 .DS_Store
