@@ -1,0 +1,20 @@
+{"ts": "2026-07-16T08:00:00.000Z", "type": "heartbeat", "sat_id": "HIVE-01", "seq": 1, "uptime_s": 84212}
+{"ts": "2026-07-16T08:00:00.140Z", "type": "heartbeat", "sat_id": "HIVE-02", "seq": 1, "uptime_s": 84190}
+{"ts": "2026-07-16T08:00:01.512Z", "type": "telemetry", "sat_id": "HIVE-01", "battery_pct": 87.4, "temp_c": -3.2, "attitude": {"roll": 0.4, "pitch": -1.1, "yaw": 12.7}}
+{"ts": "2026-07-16T08:00:02.048Z", "type": "telemetry", "sat_id": "HIVE-02", "battery_pct": 91.0, "temp_c": -1.8, "attitude": {"roll": -0.2, "pitch": 0.9, "yaw": 47.3}}
+{"ts": "2026-07-16T08:00:03.900Z", "type": "task_announced", "task_id": "T-4471", "kind": "image_capture", "target": "AOI-Kittila", "deadline": "2026-07-16T08:05:00.000Z", "reward": 120}
+{"ts": "2026-07-16T08:00:04.372Z", "type": "bid_submitted", "task_id": "T-4471", "sat_id": "HIVE-01", "bid": 74.5, "confidence": 0.88}
+{"ts": "2026-07-16T08:00:04.615Z", "type": "bid_submitted", "task_id": "T-4471", "sat_id": "HIVE-02", "bid": 69.2, "confidence": 0.91}
+{"ts": "2026-07-16T08:00:05.220Z", "type": "bid_accepted", "task_id": "T-4471", "sat_id": "HIVE-02", "winning_bid": 69.2}
+{"ts": "2026-07-16T08:00:05.410Z", "type": "bid_rejected", "task_id": "T-4471", "sat_id": "HIVE-01", "reason": "outbid"}
+{"ts": "2026-07-16T08:00:06.001Z", "type": "heartbeat", "sat_id": "HIVE-01", "seq": 2, "uptime_s": 84218}
+{"ts": "2026-07-16T08:00:07.334Z", "type": "telemetry", "sat_id": "HIVE-02", "battery_pct": 90.6, "temp_c": -1.5, "attitude": {"roll": 0.1, "pitch": 1.4, "yaw": 51.0}}
+{"ts": "2026-07-16T08:00:09.880Z", "type": "telemetry", "sat_id": "HIVE-02", "battery_pct": 89.9, "temp_c": -1.1, "attitude": {"roll": 0.0, "pitch": 2.2, "yaw": 55.8}}
+{"ts": "2026-07-16T08:00:12.450Z", "type": "task_completed", "task_id": "T-4471", "sat_id": "HIVE-02", "status": "success", "artifact": "img/AOI-Kittila-0842.tif", "duration_s": 7.2}
+{"ts": "2026-07-16T08:00:13.100Z", "type": "heartbeat", "sat_id": "HIVE-02", "seq": 2, "uptime_s": 84203}
+{"ts": "2026-07-16T08:00:15.640Z", "type": "task_announced", "task_id": "T-4472", "kind": "relay_downlink", "target": "GS-Svalbard", "deadline": "2026-07-16T08:10:00.000Z", "reward": 80}
+{"ts": "2026-07-16T08:00:16.201Z", "type": "bid_submitted", "task_id": "T-4472", "sat_id": "HIVE-01", "bid": 41.0, "confidence": 0.95}
+{"ts": "2026-07-16T08:00:16.980Z", "type": "bid_accepted", "task_id": "T-4472", "sat_id": "HIVE-01", "winning_bid": 41.0}
+{"ts": "2026-07-16T08:00:18.500Z", "type": "telemetry", "sat_id": "HIVE-01", "battery_pct": 86.1, "temp_c": -3.9, "attitude": {"roll": 1.0, "pitch": -0.7, "yaw": 20.4}}
+{"ts": "2026-07-16T08:00:22.870Z", "type": "task_completed", "task_id": "T-4472", "sat_id": "HIVE-01", "status": "success", "artifact": "relay/GS-Svalbard-0843.bin", "duration_s": 5.9}
+{"ts": "2026-07-16T08:00:24.000Z", "type": "heartbeat", "sat_id": "HIVE-01", "seq": 3, "uptime_s": 84236}
