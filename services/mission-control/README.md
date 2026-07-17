@@ -3,7 +3,9 @@
 A single Django app that **ingests**, **stores**, and **displays** telemetry
 logs. It listens for logs at `POST /ingest`, writes each request body to SQLite
 **verbatim** (no parsing on this cut), and renders them on a dark,
-mission-control-style dashboard at `GET /`.
+mission-control-style dashboard at `GET /` that **auto-refreshes live** — a
+small vanilla-JS poller hits `GET /events` every 2.5s and prepends new rows, so
+freshly ingested logs appear without a manual reload.
 
 This is **scaffolding**: the frameworks are wired up, the app is Dockerized, the
 richer normalized data model is stubbed, and exactly one end-to-end write path
@@ -14,7 +16,8 @@ richer normalized data model is stubbed, and exactly one end-to-end write path
 | Method | Path      | Purpose                                                          |
 | ------ | --------- | --------------------------------------------------------------- |
 | `POST` | `/ingest` | Store the raw request body verbatim as a `RawLog`. Returns `201`. CSRF-exempt (the caller is service #1, a machine). Empty body → `400`. |
-| `GET`  | `/`       | Server-rendered dashboard listing stored logs, newest first.    |
+| `GET`  | `/`       | Server-rendered dashboard listing stored logs, newest first. Auto-refreshes live via the poller below. |
+| `GET`  | `/events?after=<id>` | JSON feed for the dashboard poller: `RawLog`s with `id > after` (invalid/missing → `0`), oldest-first, capped at 200. Returns `{"logs": [{"id", "received_at", "payload"}...], "latest_id": <max id, or `after` if none>}`. |
 
 The `/ingest` path (no trailing slash) matches service #1's default
 `TARGET_URL` (`http://localhost:9000/ingest`), so the two services wire together
