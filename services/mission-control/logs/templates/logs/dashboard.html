@@ -92,6 +92,17 @@
         color: var(--muted);
         font-style: italic;
       }
+      @keyframes justArrived {
+        from {
+          background: rgba(79, 209, 197, 0.22);
+        }
+        to {
+          background: transparent;
+        }
+      }
+      ul.logs li.just-arrived {
+        animation: justArrived 1.6s ease-out;
+      }
       .stub {
         border: 1px dashed var(--border);
         border-radius: 4px;
@@ -115,24 +126,23 @@
   <body>
     <header>
       <h1>HiveStar Mission Control</h1>
-      <span class="status">● raw telemetry feed</span>
-      <span class="count">{{ logs|length }} log(s)</span>
+      <span class="status">● raw telemetry feed · live</span>
+      <span class="count" id="count">{{ logs|length }} log(s)</span>
     </header>
     <div class="layout">
       <section class="panel">
         <h2>Raw Log Stream — newest first</h2>
-        {% if logs %}
-        <ul class="logs">
+        <p class="empty" id="empty-msg"{% if logs %} hidden{% endif %}>
+          No logs received yet. Waiting for POST /ingest…
+        </p>
+        <ul class="logs" id="feed">
           {% for log in logs %}
-          <li>
+          <li data-id="{{ log.id }}">
             <span class="ts">{{ log.received_at|date:"Y-m-d H:i:s" }}</span
             ><span class="payload">{{ log.payload }}</span>
           </li>
           {% endfor %}
         </ul>
-        {% else %}
-        <p class="empty">No logs received yet. Waiting for POST /ingest…</p>
-        {% endif %}
       </section>
       <aside class="panel">
         <h2>Missions</h2>
@@ -145,5 +155,106 @@
         </div>
       </aside>
     </div>
+    <script>
+      (function () {
+        "use strict";
+        var POLL_MS = 2500;
+        var MAX_ROWS = 200;
+        var feed = document.getElementById("feed");
+        var emptyMsg = document.getElementById("empty-msg");
+        var countEl = document.getElementById("count");
+
+        // Start from the highest data-id already server-rendered on the page.
+        var lastId = 0;
+        feed.querySelectorAll("li[data-id]").forEach(function (li) {
+          var id = parseInt(li.getAttribute("data-id"), 10);
+          if (id > lastId) lastId = id;
+        });
+
+        // True stored total, independent of DOM children (which trim to
+        // MAX_ROWS). Seeded from the server-rendered count.
+        var total = parseInt("{{ logs|length }}", 10);
+        if (isNaN(total)) total = 0;
+
+        // Match the server-rendered timestamp format (Y-m-d H:i:s, UTC) so
+        // polled rows look identical to rendered ones (settings USE_TZ=True,
+        // TIME_ZONE=UTC).
+        function pad(n) {
+          return (n < 10 ? "0" : "") + n;
+        }
+        function formatTs(iso) {
+          var d = new Date(iso);
+          if (isNaN(d.getTime())) return iso;
+          return (
+            d.getUTCFullYear() +
+            "-" +
+            pad(d.getUTCMonth() + 1) +
+            "-" +
+            pad(d.getUTCDate()) +
+            " " +
+            pad(d.getUTCHours()) +
+            ":" +
+            pad(d.getUTCMinutes()) +
+            ":" +
+            pad(d.getUTCSeconds())
+          );
+        }
+
+        function makeRow(log) {
+          var li = document.createElement("li");
+          li.setAttribute("data-id", log.id);
+          li.className = "just-arrived";
+          var ts = document.createElement("span");
+          ts.className = "ts";
+          ts.textContent = formatTs(log.received_at);
+          var payload = document.createElement("span");
+          payload.className = "payload";
+          payload.textContent = log.payload;
+          li.appendChild(ts);
+          li.appendChild(payload);
+          return li;
+        }
+
+        function trim() {
+          while (feed.children.length > MAX_ROWS) {
+            feed.removeChild(feed.lastElementChild);
+          }
+        }
+
+        function updateCount() {
+          countEl.textContent = total + " log(s)";
+        }
+
+        async function poll() {
+          try {
+            var res = await fetch("/events?after=" + lastId, {
+              headers: { Accept: "application/json" },
+            });
+            if (res.ok) {
+              var data = await res.json();
+              var logs = data.logs || [];
+              if (logs.length) {
+                if (emptyMsg) emptyMsg.hidden = true;
+                // Oldest-first from the server: prepend each so the newest
+                // ends up on top.
+                logs.forEach(function (log) {
+                  feed.insertBefore(makeRow(log), feed.firstChild);
+                });
+                total += logs.length;
+                trim();
+                updateCount();
+              }
+              if (typeof data.latest_id === "number") {
+                lastId = data.latest_id;
+              }
+            }
+          } catch (err) {
+            // Transient failure — just retry on the next tick.
+          }
+        }
+
+        setInterval(poll, POLL_MS);
+      })();
+    </script>
   </body>
 </html>

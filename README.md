@@ -12,8 +12,9 @@ modules, `requirements.txt`, and `README.md`. Shared sample data lives in
   Endpoints: `GET /health` and `POST /replay`. Must run as a single worker.
 - [`services/mission-control`](services/mission-control/README.md) — service #2:
   a Django + SQLite app that ingests, stores, and displays telemetry logs.
-  Endpoints: `POST /ingest` (stores the raw body verbatim) and `GET /` (a
-  server-rendered dashboard). Dockerized; models beyond `RawLog` are stubbed.
+  Endpoints: `POST /ingest` (stores the raw body verbatim), `GET /` (a
+  live-refreshing server-rendered dashboard), and `GET /events` (JSON feed for
+  the dashboard poller). Dockerized; models beyond `RawLog` are stubbed.
 
 ## Running tests
 

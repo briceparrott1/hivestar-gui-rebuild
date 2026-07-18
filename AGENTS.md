@@ -36,14 +36,23 @@ a standard Django project (`missioncontrol/` settings) with **one** app
 project run via `manage.py`, so its `__init__.py` files are required — do not
 remove them.
 
-Two endpoints:
+Three endpoints:
 
 - `POST /ingest` — stores the raw request body **verbatim** as a `RawLog` row
   (no parsing on this cut). CSRF-exempt (caller is service #1, a machine); empty
   body → `400`, otherwise `201`. Path has no trailing slash to match service #1's
   default `TARGET_URL` (`http://localhost:9000/ingest`).
 - `GET /` — server-rendered dark dashboard listing stored logs newest-first,
-  plus a stubbed "Missions" panel. No JS build step.
+  plus a stubbed "Missions" panel. **Live auto-refresh:** a small inline
+  vanilla-JS poller reads its starting id from the max `data-id` in `#feed`,
+  polls `/events` every 2.5s, and **prepends** new rows (with a brief
+  "just-arrived" flash), trimming `#feed` to the newest 200. No JS build step,
+  no page reload, no SSE/WebSockets (those would tie up the sync gunicorn
+  workers).
+- `GET /events?after=<id>` — JSON feed powering the poller. Returns
+  `RawLog`s with `id > after` (invalid/missing `after` → `0`), **oldest-first**,
+  capped at 200: `{"logs": [{"id", "received_at" (isoformat), "payload"}...],
+  "latest_id": <max id returned, or `after` if none>}`. `@require_GET`.
 
 **Models are stubbed:** only `RawLog(payload, received_at)` is concrete and
 migrated. `Satellite`, `Mission`, `Task`, `Event` and their relationships are a
