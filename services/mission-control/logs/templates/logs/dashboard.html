@@ -171,8 +171,14 @@
           if (id > lastId) lastId = id;
         });
 
-        // Match the server-rendered timestamp format (Y-m-d H:i:s, local time)
-        // so polled rows look identical to rendered ones.
+        // True stored total, independent of DOM children (which trim to
+        // MAX_ROWS). Seeded from the server-rendered count.
+        var total = parseInt("{{ logs|length }}", 10);
+        if (isNaN(total)) total = 0;
+
+        // Match the server-rendered timestamp format (Y-m-d H:i:s, UTC) so
+        // polled rows look identical to rendered ones (settings USE_TZ=True,
+        // TIME_ZONE=UTC).
         function pad(n) {
           return (n < 10 ? "0" : "") + n;
         }
@@ -180,17 +186,17 @@
           var d = new Date(iso);
           if (isNaN(d.getTime())) return iso;
           return (
-            d.getFullYear() +
+            d.getUTCFullYear() +
             "-" +
-            pad(d.getMonth() + 1) +
+            pad(d.getUTCMonth() + 1) +
             "-" +
-            pad(d.getDate()) +
+            pad(d.getUTCDate()) +
             " " +
-            pad(d.getHours()) +
+            pad(d.getUTCHours()) +
             ":" +
-            pad(d.getMinutes()) +
+            pad(d.getUTCMinutes()) +
             ":" +
-            pad(d.getSeconds())
+            pad(d.getUTCSeconds())
           );
         }
 
@@ -216,7 +222,7 @@
         }
 
         function updateCount() {
-          countEl.textContent = feed.children.length + " log(s)";
+          countEl.textContent = total + " log(s)";
         }
 
         async function poll() {
@@ -234,6 +240,7 @@
                 logs.forEach(function (log) {
                   feed.insertBefore(makeRow(log), feed.firstChild);
                 });
+                total += logs.length;
                 trim();
                 updateCount();
               }
